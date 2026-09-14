@@ -1,35 +1,15 @@
+# H&M Personalized Fashion Recommendations - Enhanced Dataset
+
+## Dataset Description
+
+This dataset is a processed and enhanced version of the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle competition dataset. The original dataset has been cleaned and augmented with pre-computed embeddings and accessible image URLs to facilitate fashion recommendation research and multimodal retrieval applications.
+
 ```
 mkdir -p data && wget "https://huggingface.co/datasets/Qdrant/hm_ecommerce_products/resolve/main/hm_ecommerce_products_enriched.parquet" -O data/hm_products.parquet
 
 uv add pandas
 uv add fastparquet
 ```
-
-
----
-license: cc-by-4.0
-task_categories:
-- image-classification
-- text-classification
-- image-to-text
-- image-feature-extraction
-tags:
-- fashion
-- recommendation
-- embeddings
-- retail
-- e-commerce
-- multimodal
-pretty_name: H&M Fashion - Enhanced with Embeddings
-size_categories:
-- 100K<n<1M
----
-
-# H&M Personalized Fashion Recommendations - Enhanced Dataset
-
-## Dataset Description
-
-This dataset is a processed and enhanced version of the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle competition dataset. The original dataset has been cleaned and augmented with pre-computed embeddings and accessible image URLs to facilitate fashion recommendation research and multimodal retrieval applications.
 
 ### Dataset Summary
 
