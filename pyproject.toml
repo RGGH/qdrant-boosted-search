@@ -1,0 +1,15 @@
+[project]
+name = "hnm"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets>=5.0.1",
+    "fastparquet>=2026.5.0",
+    "matplotlib>=3.11.1",
+    "pandas>=3.0.5",
+    "qdrant-client>=1.19.0",
+    "sentence-transformers>=6.0.1",
+    "streamlit>=1.63.0",
+]
