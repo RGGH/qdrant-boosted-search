@@ -261,7 +261,7 @@ Fashion recommendation systems can influence purchasing decisions and consumer b
 ### Dataset Curators
 
 Original dataset: H&M Group via Kaggle
-Enhanced version: [Your name/organization]
+Enhanced version: Qdrant
 
 ### Licensing Information
 
@@ -300,16 +300,4 @@ Contributions and feedback are welcome! Please open an issue or pull request if 
 - BAAI for the BGE embedding model
 - NAVER for the SPLADE sparse embedding model
 
-### Contact
 
-For questions or issues, please contact [your contact information] or open an issue on the dataset repository.
-
----
-
-## Example Notebooks
-
-Coming soon:
-- Fashion retrieval with Qdrant vector database
-- Hybrid dense-sparse search implementation
-- Building a personalized recommendation engine
-- Multi-modal fashion search (text + image)

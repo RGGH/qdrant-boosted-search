@@ -1,0 +1,38 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Data (large / regenerable — don't push to GitHub)
+data/
+*.parquet
+*.csv
+
+# Images (product images pulled from the dataset)
+images/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# uv
+# Keep uv.lock committed for reproducibility — don't ignore it.
+# Uncomment below only if you deliberately don't want to lock deps:
+# uv.lock
+
+# Environment / secrets
+.env
+.env.*
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
