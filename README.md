@@ -5,47 +5,6 @@ uv add pandas
 uv add fastparquet
 ```
 
-```bash
-hm-qdrant-demo/
-│
-├── data/
-│   └── hm_products.parquet
-│
-├── src/
-│   ├── embeddings.py
-│   ├── qdrant.py
-│   └── search.py
-│
-├── main.py
-└── pyproject.toml
-```
-
-```bash
-
-BATCH_SIZE = 1000
-
-batch = []
-
-FOR each product:
-
-    popularity = generate_score()
-
-    add {
-        id: product.id
-        popularity: popularity
-    }
-    to batch
-
-    IF batch has 1000 products:
-
-        send batch to Qdrant
-
-        clear batch
-
-AFTER loop:
-
-    send remaining products
-```
 
 ---
 license: cc-by-4.0
