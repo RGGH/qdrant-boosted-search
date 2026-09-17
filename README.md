@@ -17,7 +17,7 @@ The H&M dataset contains rich product metadata, customer information, and transa
 - **~106,000 fashion products** with detailed metadata
 - **~1.37 million customers** with demographic information
 - **Historical transaction data** for recommendation modeling
-- **Product images** accessible via S3 URLs
+- **Product images** ~~accessible via S3 URLs~~
 - **Pre-computed dense embeddings** (BGE-small-en-1.5)
 - **Pre-computed sparse embeddings** (SPLADEv1)
 
