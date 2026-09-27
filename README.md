@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # qdrant-boosted-search
  
 ## Running the demo
@@ -16,7 +15,7 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 ```
  
 Then open `http://localhost:8501` and try a query like *"summer dress, long sleeves"*, adjust the popularity/recency weights, and watch the ranking move.
-||||||| 3c13733
+
 =======
 # H&M Personalized Fashion Recommendations - Enhanced Dataset
 
