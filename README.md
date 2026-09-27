@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # qdrant-boosted-search
  
 ## Running the demo
@@ -15,6 +16,14 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 ```
  
 Then open `http://localhost:8501` and try a query like *"summer dress, long sleeves"*, adjust the popularity/recency weights, and watch the ranking move.
+||||||| 3c13733
+=======
+# H&M Personalized Fashion Recommendations - Enhanced Dataset
+
+## Dataset Description
+
+This dataset is a processed and enhanced version of the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle competition dataset. The original dataset has been cleaned and augmented with pre-computed embeddings and accessible image URLs to facilitate fashion recommendation research and multimodal retrieval applications.
+>>>>>>> 6c6484148788a4b24f90d46c4e08aec746ea4270
 
 ```
 mkdir -p data && wget "https://huggingface.co/datasets/Qdrant/hm_ecommerce_products/resolve/main/hm_ecommerce_products_enriched.parquet" -O data/hm_products.parquet
@@ -23,80 +32,13 @@ uv add pandas
 uv add fastparquet
 ```
 
-```bash
-hm-qdrant-demo/
-│
-├── data/
-│   └── hm_products.parquet
-│
-├── src/
-│   ├── embeddings.py
-│   ├── qdrant.py
-│   └── search.py
-│
-├── main.py
-└── pyproject.toml
-```
-
-```bash
-
-BATCH_SIZE = 1000
-
-batch = []
-
-FOR each product:
-
-    popularity = generate_score()
-
-    add {
-        id: product.id
-        popularity: popularity
-    }
-    to batch
-
-    IF batch has 1000 products:
-
-        send batch to Qdrant
-
-        clear batch
-
-AFTER loop:
-
-    send remaining products
-```
-
----
-license: cc-by-4.0
-task_categories:
-- image-classification
-- text-classification
-- image-to-text
-- image-feature-extraction
-tags:
-- fashion
-- recommendation
-- embeddings
-- retail
-- e-commerce
-- multimodal
-pretty_name: H&M Fashion - Enhanced with Embeddings
-size_categories:
-- 100K<n<1M
----
-
-# H&M Personalized Fashion Recommendations - Enhanced Dataset
-
-## Dataset Description
-
-This dataset is a processed and enhanced version of the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle competition dataset. The original dataset has been cleaned and augmented with pre-computed embeddings and accessible image URLs to facilitate fashion recommendation research and multimodal retrieval applications.
-
 ### Dataset Summary
 
 The H&M dataset contains rich product metadata, customer information, and transaction history from H&M's e-commerce platform. This enhanced version includes:
 - **~106,000 fashion products** with detailed metadata
 - **~1.37 million customers** with demographic information
 - **Historical transaction data** for recommendation modeling
-- **Product images** accessible via S3 URLs
+- **Product images** ~~accessible via S3 URLs~~
 - **Pre-computed dense embeddings** (BGE-small-en-1.5)
 - **Pre-computed sparse embeddings** (SPLADEv1)
 
