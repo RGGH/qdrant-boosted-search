@@ -60,6 +60,30 @@ COLOUR_OPTIONS = [
     "Bronze",
 ]
 
+# How many candidates to consider when working out each item's "pure
+# vector similarity" rank, for the rank-movement chart. Matches the
+# prefetch limit used by boosted_search so the two rankings are over the
+# same pool.
+VECTOR_RANK_POOL_SIZE = 100
+
+
+def build_colour_filter(colour: str | None):
+    """Shared colour filter builder, used both for the boosted query's
+    prefetch and for the plain vector-only ranking query, so both rank
+    over the exact same candidate pool."""
+
+    if colour and colour != "Any":
+        return models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="colour",
+                    match=models.MatchValue(value=colour),
+                )
+            ]
+        )
+
+    return None
+
 
 def build_recency_decay_expression(decay_type: str, params: models.DecayParamsExpression):
     """Build the Qdrant decay Expression matching the chosen decay_type."""
@@ -161,15 +185,13 @@ def recency_decay_value(
 
 
 def boosted_search(
-    query: str,
+    query_vector,
     popularity_weight: float,
     recency_weight: float,
     decay_type: str,
     colour: str | None = None,
     limit: int = 10,
 ):
-    query_vector = embed_query(query)
-
     recency_decay_params = models.DecayParamsExpression(
         x="recency",
         target=RECENCY_TARGET,
@@ -183,17 +205,7 @@ def boosted_search(
 
     # Filter the candidate set to the chosen colour *before* reranking, so
     # the formula only ever scores/returns matching points.
-    prefetch_filter = None
-
-    if colour and colour != "Any":
-        prefetch_filter = models.Filter(
-            must=[
-                models.FieldCondition(
-                    key="colour",
-                    match=models.MatchValue(value=colour),
-                )
-            ]
-        )
+    prefetch_filter = build_colour_filter(colour)
 
     results = client.query_points(
         collection_name=COLLECTION_NAME,
@@ -225,6 +237,27 @@ def boosted_search(
     )
 
     return results.points
+
+
+def get_vector_only_ranks(query_vector, colour: str | None = None, limit: int = VECTOR_RANK_POOL_SIZE):
+    """Rank every candidate by vector similarity alone (no popularity/
+    recency boost), over the same colour-filtered pool the boosted search
+    draws its prefetch from. Returns {point_id: 1-indexed rank}, so callers
+    can look up "where would this item have ranked without boosting?".
+    """
+
+    colour_filter = build_colour_filter(colour)
+
+    results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vector,
+        using="dense",
+        query_filter=colour_filter,
+        limit=limit,
+        with_payload=False,
+    )
+
+    return {point.id: rank for rank, point in enumerate(results.points, start=1)}
 
 
 def plot_decay_score_comparison(scores_by_decay: dict, selected_decay_type: str):
@@ -278,6 +311,102 @@ def plot_decay_score_comparison(scores_by_decay: dict, selected_decay_type: str)
     return fig
 
 
+def plot_rank_movement(rows, pool_size: int = VECTOR_RANK_POOL_SIZE):
+    """Slope chart: left column is each item's rank under vector similarity
+    alone, right column is its rank after popularity/recency boosting.
+    A line rising from a low position (further down the left column) up to
+    a high one on the right shows the boost pulling that item up; a flat
+    line means the item was already near the top on vectors alone.
+
+    Both columns are drawn at evenly spaced vertical slots (1, 2, 3, ...)
+    rather than at the literal rank numbers. The boosted side is always a
+    tight 1..n already; if we plotted the vector-only side at its real
+    values (which can range up into the hundreds) on the *same* numeric
+    axis, the boosted side would get compressed into an unreadable sliver
+    near the top. Slots keep both sides equally legible; the real rank
+    number is still shown as a text label next to each point.
+
+    rows: list of dicts with at least "item" (name) and "boosted_rank"
+    (1-indexed final position). "vector_rank" may be missing/None if the
+    item didn't appear in the top `pool_size` vector-only candidates.
+    """
+
+    n = len(rows)
+
+    def vector_sort_key(row):
+        vr = row.get("vector_rank")
+        return vr if vr is not None else pool_size + 1
+
+    # Slot 1 = best (lowest) vector-only rank among these items, slot n =
+    # worst, ties broken by original order.
+    left_slot_by_index = {}
+    for slot, (original_index, _row) in enumerate(
+        sorted(enumerate(rows), key=lambda pair: vector_sort_key(pair[1])),
+        start=1,
+    ):
+        left_slot_by_index[original_index] = slot
+
+    fig, ax = plt.subplots(figsize=(6.5, max(3, 0.9 * n)))
+
+    left_x, right_x = 0.0, 1.0
+
+    for i, row in enumerate(rows):
+        boosted_slot = row["boosted_rank"]  # already an even 1..n slot
+        left_slot = left_slot_by_index[i]
+        vector_rank = row.get("vector_rank")
+
+        vector_rank_label = (
+            f">{pool_size}" if vector_rank is None else str(vector_rank)
+        )
+
+        if left_slot > boosted_slot:
+            color = "#55A868"  # green: boosting pulled it up
+        elif left_slot < boosted_slot:
+            color = "#C44E52"  # red: boosting pushed it down
+        else:
+            color = "#8C8C8C"  # grey: unchanged
+
+        ax.plot(
+            [left_x, right_x],
+            [left_slot, boosted_slot],
+            marker="o",
+            markersize=6,
+            color=color,
+            linewidth=2.2,
+            zorder=2,
+        )
+
+        ax.text(
+            left_x - 0.04,
+            left_slot,
+            f"{row['item']}  ({vector_rank_label})",
+            ha="right",
+            va="center",
+            fontsize=9,
+        )
+        ax.text(
+            right_x + 0.04,
+            boosted_slot,
+            f"#{boosted_slot}",
+            ha="left",
+            va="center",
+            fontsize=9,
+        )
+
+    ax.set_xlim(-1.6, 1.6)
+    ax.set_ylim(n + 0.5, 0.5)  # inverted: slot 1 at the top
+    ax.set_xticks([left_x, right_x])
+    ax.set_xticklabels(["Vector-only rank", "Boosted rank"])
+    ax.set_yticks([])
+    for spine in ("top", "right", "left"):
+        ax.spines[spine].set_visible(False)
+    ax.set_title("Where boosting moved each result")
+
+    plt.tight_layout()
+
+    return fig
+
+
 st.title("Boosted Search")
 st.caption("Semantic search, re-ranked with popularity and recency signals")
 
@@ -321,8 +450,10 @@ run = st.button(
 if run and query:
 
     with st.spinner("Searching..."):
+        query_vector = embed_query(query)
+
         points = boosted_search(
-            query,
+            query_vector,
             popularity_weight,
             recency_weight,
             decay_type,
@@ -365,9 +496,14 @@ if run and query:
         if anchor_dt is None:
             anchor_dt = max(purchase_dts) if purchase_dts else None
 
+        # Rank each of these top-5 items by vector similarity alone (no
+        # popularity/recency boost), over the same candidate pool, so we
+        # can show how much the boost moved them.
+        vector_ranks = get_vector_only_ranks(query_vector, colour)
+
         rows = []
 
-        for r in parsed:
+        for i, r in enumerate(parsed):
             p = r["point"]
             payload = r["payload"]
 
@@ -402,6 +538,8 @@ if run and query:
                     "recency_decay": recency_decay,
                     "days_since_purchase": days_since,
                     "colour": item_colour,
+                    "boosted_rank": i + 1,
+                    "vector_rank": vector_ranks.get(p.id),
                 }
             )
 
@@ -446,6 +584,8 @@ if run and query:
                 "popularity",
                 "recency",
                 "days_since_purchase",
+                "vector_rank",
+                "boosted_rank",
             ]
         ]
 
@@ -499,6 +639,17 @@ if run and query:
 
         st.pyplot(fig)
 
+        st.subheader("Where boosting moved things")
+        st.caption(
+            "Left column: rank if we only used vector similarity, within "
+            f"the same top-{VECTOR_RANK_POOL_SIZE} candidate pool. Right "
+            "column: rank after adding popularity and recency. Green rising "
+            "lines are items the boost pulled up; red falling lines are "
+            "items it pushed down; grey lines were already in place."
+        )
+
+        st.pyplot(plot_rank_movement(rows))
+
         st.subheader("How other decay functions would have ranked this search")
 
         other_decay_types = [k for k in DECAY_LABELS if k != decay_type]
@@ -508,7 +659,7 @@ if run and query:
 
             for other_type in other_decay_types:
                 other_points = boosted_search(
-                    query,
+                    query_vector,
                     popularity_weight,
                     recency_weight,
                     other_type,

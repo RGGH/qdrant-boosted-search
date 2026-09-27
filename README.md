@@ -1,3 +1,21 @@
+# qdrant-boosted-search
+ 
+## Running the demo
+ 
+```bash
+uv sync
+uv run python -m streamlit run src/app.py
+```
+## Serve images
+
+```bash
+/home/moo/Documents/python/qdrant-boosted-search/data
+python3 -m http.server 8000
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+```
+ 
+Then open `http://localhost:8501` and try a query like *"summer dress, long sleeves"*, adjust the popularity/recency weights, and watch the ranking move.
+
 ```
 mkdir -p data && wget "https://huggingface.co/datasets/Qdrant/hm_ecommerce_products/resolve/main/hm_ecommerce_products_enriched.parquet" -O data/hm_products.parquet
 
