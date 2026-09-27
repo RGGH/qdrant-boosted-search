@@ -23,7 +23,6 @@ Then open `http://localhost:8501` and try a query like *"summer dress, long slee
 ## Dataset Description
 
 This dataset is a processed and enhanced version of the [H&M Personalized Fashion Recommendations](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations) Kaggle competition dataset. The original dataset has been cleaned and augmented with pre-computed embeddings and accessible image URLs to facilitate fashion recommendation research and multimodal retrieval applications.
->>>>>>> 6c6484148788a4b24f90d46c4e08aec746ea4270
 
 ```
 mkdir -p data && wget "https://huggingface.co/datasets/Qdrant/hm_ecommerce_products/resolve/main/hm_ecommerce_products_enriched.parquet" -O data/hm_products.parquet
