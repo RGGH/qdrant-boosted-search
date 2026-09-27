@@ -1,4 +1,5 @@
 # qdrant-boosted-search
+<img width="1280" height="878" alt="ff4c859ead52342cecec01e0864981a3" src="https://github.com/user-attachments/assets/c46eab36-3a8f-48a4-8ee9-015a4a6837d7" />
  
 ## Running the demo
  
